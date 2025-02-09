@@ -2,12 +2,11 @@ import fitz  # PyMuPDF required
 import os
 from markitdown import MarkItDown
 from openai import OpenAI
-from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 import chromadb
 import os
 from PIL import Image
 from IPython.display import Image as IPImage, display
-
 
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 chroma_client = chromadb.PersistentClient(path="image_desc_vectordb")
