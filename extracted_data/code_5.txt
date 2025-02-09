@@ -1,0 +1,35 @@
+{
+
+for(j=0; j<size-1; j++)
+
+{
+
+if(data[j]<data[j+1])
+
+{
+
+temp=data[j];
+
+data[j]=data[j+1];
+
+data[j+1]=temp;
+
+}
+
+}
+
+}
+
+}
+
+// Printing the Output Array.
+
+printf(“After Bubble Sort Array is as follows: n”);
+
+for(i=0; i<size; i++)
+
+printf(“%d t”, data[i]);
+
+getch();
+
+}

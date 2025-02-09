@@ -1,0 +1,29 @@
+if(data[i]<data[j])
+
+{
+
+temp=data[i];
+
+data[i]=data[j];
+
+data[j]=temp;
+
+}
+
+}
+
+}
+
+}
+
+printf(“n”);
+
+printf(“After Sorting Array is as follows: n”);
+
+for(i=0; i<size; i++)
+
+printf(” %d t”,data[i]);
+
+getch();
+
+}

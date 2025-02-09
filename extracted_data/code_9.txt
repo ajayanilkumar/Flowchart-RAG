@@ -1,0 +1,17 @@
+//Volume of Cube
+#include <stdio.h>
+int main() {
+
+// Declare variables
+float E, Volume;
+// Input: Get the edge length of the cube from the user
+printf("Enter the edge length of the cube: ");
+scanf("%f", &E);
+// Calculate Cube Volume
+Volume = E * E * E;
+// Print Cube Volume
+printf("Volume of the cube with edge length %.2f is: %.2f\n", E,
+Volume);
+
+return 0; // Indicates successful execution
+}
