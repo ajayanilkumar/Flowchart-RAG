@@ -1,26 +1,22 @@
-// C program to find largest of two numbers
-
+//Find Maximum of 3 Numbers 
 #include <stdio.h>
-
-int main()
-{
-
-int num1, num2, largest;
-
-/*Input two numbers*/
-printf("Enter two numbers:\n");
-scanf("%d%d", &num1, &num2);
-
-/*check if a is greater than b*/
-if (num1 > num2)
-
-largest = num1;
-else
-
-largest = num2;
-
-/*Print the largest number*/
-printf("%d", largest);
-
-return 0;
+int main() {
+// Declare variables 
+int N1, N2, N3, Max;
+// Input: Get three numbers from the user 
+printf("Enter three numbers: "); 
+scanf("%d %d %d", &N1, &N2, &N3);
+// Find Maximum Number 
+Max = N1; // Initialize Max to N1
+// Check if N2 is greater than Max 
+if (N2 > Max) {
+Max = N2; 
+}
+// Check if N3 is greater than Max 
+if (N3 > Max) {
+Max = N3; 
+}
+// Print Maximum Number 
+printf("Maximum number is: %d\n", Max);
+return 0; // Indicates successful execution 
 }

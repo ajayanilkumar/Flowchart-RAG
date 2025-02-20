@@ -16,47 +16,63 @@ from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
-
 def extract_images_and_code(pdf_path, output_folder):
     os.makedirs(output_folder, exist_ok=True)
     pdf_document = fitz.open(pdf_path)
-
-    image_index = 1
-    code_text = ""
-    code_filename = None
+    global_image_index = 1
+    text_accumulator = ""
 
     for page_num in range(len(pdf_document)):
         page = pdf_document[page_num]
-        blocks = page.get_text("blocks")
-
+        # Get page blocks as a dict and sort them in reading order (top-to-bottom)
+        page_dict = page.get_text("dict")
+        blocks = page_dict["blocks"]
+        blocks.sort(key=lambda b: b["bbox"][1])
+        
         for block in blocks:
-            x0, y0, x1, y1, text, block_no, block_type = block
-
-            if block_type == 0:  # Text block
-                if code_filename is None: #check if this is the first line of code for this image
-                    code_filename = os.path.join(output_folder, f"code_{image_index}.txt")
-                code_text += text + "\n"  # Accumulate ALL text as code
-
-            elif block_type == 1:  # Image block
-                images = page.get_images(full=True)
-                for img_index, img in enumerate(images):
-                    xref = img[0]
+            if block["type"] == 0:  # Text block
+                # Extract text by concatenating all spans from the block
+                block_text = ""
+                for line in block.get("lines", []):
+                    for span in line.get("spans", []):
+                        block_text += span.get("text", "") + " "
+                    block_text += "\n"
+                text_accumulator += block_text.strip() + "\n"
+            elif block["type"] == 1:  # Image block
+                # When an image is encountered, save the accumulated text as the corresponding code file.
+                code_filename = os.path.join(output_folder, f"code_{global_image_index}.txt")
+                with open(code_filename, "w") as cf:
+                    cf.write(text_accumulator.strip())
+                # Reset the accumulator for the next snippet.
+                text_accumulator = ""
+                
+                # Extract and save the image with the corresponding number
+                xref = block.get("xref")
+                if xref:
                     base_image = pdf_document.extract_image(xref)
-                    image_bytes = base_image["image"]
                     image_ext = base_image["ext"]
-                    image_filename = os.path.join(output_folder, f"image_{image_index}.{image_ext}")
+                    image_filename = os.path.join(output_folder, f"image_{global_image_index}.{image_ext}")
                     with open(image_filename, "wb") as img_file:
-                        img_file.write(image_bytes)
+                        img_file.write(base_image["image"])
+                    print(f"Saved image: {image_filename} and code: {code_filename}")
+                else:
+                    print("Warning: Image block without xref found.")
+                
+                global_image_index += 1
 
-                    if code_filename:  # Save code if associated with the image
-                        with open(code_filename, "w") as code_file:
-                            code_file.write(code_text)
-                        code_text = ""  # Reset for the next code block
-                        code_filename = None
-                    image_index += 1
+    # Save any remaining text at the end as a trailing code snippet
+    if text_accumulator.strip():
+        code_filename = os.path.join(output_folder, f"code_{global_image_index}.txt")
+        with open(code_filename, "w") as cf:
+            cf.write(text_accumulator.strip())
+        print(f"Saved trailing code snippet as: {code_filename}")
+    
+    print(f"Extraction complete! Files saved in: {output_folder}")
 
-    print(f"Images and code extracted and saved to {output_folder}")
-    return
+# Example usage:
+pdf_path = "Codes_and_Flowcharts_Dataset.pdf"
+output_folder = "extracted_data"
+extract_images_and_code(pdf_path, output_folder)
 
 
 def create_vectordb(images_path, code_path):
@@ -116,90 +132,47 @@ def query_flowchart(query, output_folder):
 
 
 def extract_code_and_images(pdf_path, output_folder):
-    doc = fitz.open(pdf_path)
-    all_data = []
-    current_code = ""
+    os.makedirs(output_folder, exist_ok=True)
+    pdf_document = fitz.open(pdf_path)
 
-    for page_num in range(doc.page_count):
-        page = doc[page_num]
-        text_blocks = page.get_text("blocks")
+    image_index = 1
+    code_text = ""
+    code_filename = None
 
-        for block in text_blocks:
+    for page_num in range(len(pdf_document)):
+        page = pdf_document[page_num]
+        blocks = page.get_text("blocks")
+
+        for block in blocks:
             x0, y0, x1, y1, text, block_no, block_type = block
-            if block_type == 0:  # Text block (code)
-                current_code += text + "\n"
+
+            if block_type == 0:  # Text block
+                if code_filename is None:
+                    code_filename = os.path.join(output_folder, f"code_{image_index}.txt")
+                code_text += text + "\n"
 
             elif block_type == 1:  # Image block
-                image_x0, image_y0, image_x1, image_y1, *_ = block
-                image_xref = page.get_image_xrefs()
-
-                for xref in image_xref:
-                    rect = page.get_image_rects(xref)
-                    if rect.x0 == image_x0 and rect.y0 == image_y0 and rect.x1 == image_x1 and rect.y1 == image_y1:
-                        image = doc.extract_image(xref)
-                        image_bytes = image["image"]
-                        all_data.append((current_code.strip(), image_bytes))
-                        current_code = ""  # Reset code after associating with image
-                        break  # Important: Exit inner loop after finding the image
-
-        # Check for code at the end of the current page
-        if current_code:
-            next_page_num = page_num + 1
-            if next_page_num < doc.page_count:
-                next_page = doc[next_page_num]
-                next_page_images = next_page.get_images(full=True)  # Get all images
-
-                # Filter small images based on their size (bytes)
-                filtered_images = []
-                for image_info in next_page_images:
-                    xref = image_info[0]
-                    image = doc.extract_image(xref)
+                image_xrefs = page.get_image_xrefs() #Get all the image xrefs on the page
+                for xref in image_xrefs: #Iterate through each xref
+                    image = pdf_document.extract_image(xref) #Extract the image using the xref
                     image_bytes = image["image"]
-                    if len(image_bytes) > 1000:  # Example: Keep images larger than 1KB
-                        filtered_images.append(image_info)
+                    image_ext = image["ext"]
+                    image_filename = os.path.join(output_folder, f"image_{image_index}.{image_ext}")
+                    with open(image_filename, "wb") as img_file:
+                        img_file.write(image_bytes)
 
-                if filtered_images:
-                    next_image_xref = filtered_images[0][0] # take the first image
-                    next_image = doc.extract_image(next_image_xref)
-                    next_image_bytes = next_image["image"]
-                    all_data.append((current_code.strip(), next_image_bytes))
-                    current_code = ""
-                else:
-                    all_data.append((current_code.strip(), None))
-                    current_code = ""
+                    if code_filename:
+                        with open(code_filename, "w") as code_file:
+                            code_file.write(code_text)
+                        code_text = ""
+                        code_filename = None
+                    image_index += 1
 
-            else:
-                all_data.append((current_code.strip(), None))
-                current_code = ""
-
-    return all_data
-
+    print(f"Images and code extracted and saved to {output_folder}")
+    return
 
 
 def save_image(image_bytes, output_folder, filename):
     with open(os.path.join(output_folder, filename), "wb") as f:
         f.write(image_bytes)
 
-# Example usage:
-pdf_path = "Codes_and_Flowcharts_Dataset.pdf"
-output_folder = "extracted_data"
-# import os
-# os.makedirs(output_folder, exist_ok=True)
-# extracted_data = extract_code_and_images(pdf_path, output_folder)
-
-# for i, (code, image_bytes) in enumerate(extracted_data):
-#     if image_bytes:
-#         save_image(image_bytes, output_folder, f"image_{i}.jpeg")  # Save image
-#     with open(os.path.join(output_folder,f"code_{i}.txt"),"w") as f:
-#         f.write(code) # save code
-
-#     print(f"--- Data Point {i+1} ---")
-#     print("Code:", code)
-#     if image_bytes:
-#       print("Image saved as image_{i}.jpeg")
-#     else:
-#       print("No associated Image")
-#     print("-" * 20)
-
-
-extract_images_and_code_from_pdf(pdf_path, output_folder)

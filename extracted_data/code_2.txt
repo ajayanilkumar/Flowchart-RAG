@@ -1,83 +1,20 @@
-//Selection sort
-
-#include<stdio.h>
-
-#include<conio.h>
-
-#define MAX 100
-
-void main()
-
-{
-
-int data[MAX];
-
-int i, j, temp, size, sort;
-
-clrscr();
-
-printf(“Enter the size of the Array. n”);
-
-scanf(“%d”, &size);
-
-printf(“Size of the Array : %d n”, size);
-
-printf(“Enter elements of Array: n”);
-
-for(i=0; i<size; i++)
-
-scanf(“%d”, &data[i]);
-
-printf(“Array is as follows: n”);
-
-for(i=0; i<size; i++)
-
-printf(“%d t”, data[i]);
-
-printf(“n 1. Sort in Ascending n 2. sort in Descending n”);
-
-printf(“Enter your choice: “);
-
-scanf(“%d”, &sort);
-
-if(sort==1)
-
-{
-
-for(i=0; i<size; i++)
-
-{
-
-for(j=i+1; j<size; j++)
-
-{
-
-if(data[i]>data[j])
-
-{
-
-temp=data[i];
-
-data[i]=data[j];
-
-data[j]=temp;
-
+//net salary of an employee.
+#include <stdio.h> 
+int main() {
+// Declare variables 
+float basic, DA, HRA, CCA, netSalary; 
+printf("Enter the basic salary: "); 
+scanf("%f", &basic); 
+if (basic >= 4000) {
+// Step 3.1: Calculate DA 
+DA = 0.32 * basic; 
+HRA = 0.15 * basic; 
+CCA = 325; 
+netSalary = basic + DA + HRA + CCA; 
+printf("Net Salary: %.2f\n", netSalary); 
+} else {
+printf("Basic salary should be greater than or equal to 
+4000.\n");
+} 
+return 0; 
 }
-
-}
-
-}
-
-}
-
-if(sort==2)
-
-{
-
-for(i=0; i<size; i++)
-
-{
-
-for(j=i+1; j<size; j++)
-
-{
