@@ -1,20 +1,6 @@
 //net salary of an employee.
-#include <stdio.h> 
-int main() {
-// Declare variables 
-float basic, DA, HRA, CCA, netSalary; 
-printf("Enter the basic salary: "); 
-scanf("%f", &basic); 
-if (basic >= 4000) {
-// Step 3.1: Calculate DA 
-DA = 0.32 * basic; 
-HRA = 0.15 * basic; 
-CCA = 325; 
-netSalary = basic + DA + HRA + CCA; 
-printf("Net Salary: %.2f\n", netSalary); 
-} else {
-printf("Basic salary should be greater than or equal to 
-4000.\n");
-} 
-return 0; 
-}
+#include <stdio.h> int main() {
+// Declare variables float basic, DA, HRA, CCA, netSalary; printf("Enter the basic salary: "); scanf("%f", &basic); if (basic >= 4000) {
+// Step 3.1: Calculate DA DA = 0.32 * basic; HRA = 0.15 * basic; CCA = 325; netSalary = basic + DA + HRA + CCA; printf("Net Salary: %.2f\n", netSalary); } else {
+printf("Basic salary should be greater than or equal to 4000.\n");
+} return 0; }
