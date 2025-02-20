@@ -1,0 +1,60 @@
+//Bubble sort
+#include<stdio.h>
+#include<conio.h>
+#define MAX 100
+void main()
+{
+int data[MAX];
+int i, j, temp, size, choice;
+clrscr();
+printf(“Enter size of Array: “);
+scanf(“%d”, &size);
+printf(“Enter elements of Array. n”);
+// Taking Input for Array.
+for(i=0; i<size; i++)
+scanf(“%d”, &data[i]);
+printf(“Array is as follows: n”);
+// Print the Input Array.
+for(i=0; i<size; i++)
+printf(“%d t”, data[i]);
+printf(“n 1. Sort in Ascending n 2. Sort in Descending n”);
+printf(“Enter your choice: “);
+scanf(“%d”, &choice);
+// Sorting Array in Ascending order.
+if(choice==1)
+{
+for(i=0; i<size; i++)
+{
+for(j=0; j<size-1; j++)
+{
+if(data[j]>data[j+1])
+{
+temp=data[j];
+data[j]=data[j+1];
+data[j+1]=temp;
+}
+}
+}
+}
+// Sorting Array in Descending order.
+if(choice==2)
+{
+for(i=0; i<size; i++)
+{
+for(j=0; j<size-1; j++)
+{
+if(data[j]<data[j+1])
+{
+temp=data[j];
+data[j]=data[j+1];
+data[j+1]=temp;
+}
+}
+}
+}
+// Printing the Output Array.
+printf(“After Bubble Sort Array is as follows: n”);
+for(i=0; i<size; i++)
+printf(“%d t”, data[i]);
+getch();
+}
