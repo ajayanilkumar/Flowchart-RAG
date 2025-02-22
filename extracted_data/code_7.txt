@@ -1,22 +1,11 @@
-//Find Maximum of 3 Numbers 
-#include <stdio.h>
+//Find Maximum of 3 Numbers #include <stdio.h>
 int main() {
-// Declare variables 
-int N1, N2, N3, Max;
-// Input: Get three numbers from the user 
-printf("Enter three numbers: "); 
-scanf("%d %d %d", &N1, &N2, &N3);
-// Find Maximum Number 
-Max = N1; // Initialize Max to N1
-// Check if N2 is greater than Max 
-if (N2 > Max) {
-Max = N2; 
-}
-// Check if N3 is greater than Max 
-if (N3 > Max) {
-Max = N3; 
-}
-// Print Maximum Number 
-printf("Maximum number is: %d\n", Max);
-return 0; // Indicates successful execution 
-}
+// Declare variables int N1, N2, N3, Max;
+// Input: Get three numbers from the user printf("Enter three numbers: "); scanf("%d %d %d", &N1, &N2, &N3);
+// Find Maximum Number Max = N1; // Initialize Max to N1
+// Check if N2 is greater than Max if (N2 > Max) {
+Max = N2; }
+// Check if N3 is greater than Max if (N3 > Max) {
+Max = N3; }
+// Print Maximum Number printf("Maximum number is: %d\n", Max);
+return 0; // Indicates successful execution }
