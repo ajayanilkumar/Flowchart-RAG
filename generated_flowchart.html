@@ -1,0 +1,20 @@
+
+    <html>
+    <head>
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+    </head>
+    <body>
+        <div class="mermaid">graph TD
+    A(Start) --> B[Input num1]
+    B --> C[Input num2]
+    C --> D{num1 > num2}
+    D -- Yes --> E[Display num1]
+    D -- No --> F[Display num2]
+    E --> G(Stop)
+    F --> G(Stop)</div>
+    </body>
+    </html>
+    
