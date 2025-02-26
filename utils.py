@@ -8,6 +8,7 @@ import os
 from PIL import Image
 from IPython.display import Image as IPImage, display
 import re
+import webbrowser
 
 
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -212,6 +213,12 @@ def render_mermaid(flowchart_code):
 def save_image(image_bytes, output_folder, filename):
     with open(os.path.join(output_folder, filename), "wb") as f:
         f.write(image_bytes)
+
+def open_pdf(pdf_path):
+    abs_path = os.path.abspath(pdf_path)  # Get absolute path
+    webbrowser.open(f'file://{abs_path}')  # Open in default browser
+
+
 
 
 
