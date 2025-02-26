@@ -7,6 +7,9 @@ import chromadb
 import os
 from PIL import Image
 from IPython.display import Image as IPImage, display
+import re
+import webbrowser
+
 
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 chroma_client = chromadb.PersistentClient(path="image_desc_vectordb")
@@ -64,6 +67,7 @@ def extract_images_and_code(pdf_path, output_folder):
         print(f"Saved trailing code snippet: {code_filename}")
 
     print(f"Extraction complete! Files saved in: {output_folder}")
+
 
 def create_vectordb(output_folder):
     images_path = output_folder  # Since images and code are in the same folder
@@ -128,8 +132,94 @@ def query_flowchart(query, output_folder):
     else:
         print("No matching flowchart found.")
 
+
+def query_flowchart_for_prompt(query, output_folder):
+    query_embedding = embeddings.embed_query(query)
+
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=1  
+    )
+
+    if results["ids"] and results["ids"][0]:
+        image_filename = results["ids"][0][0]
+        document_text = results["documents"][0][0]  # Retrieve stored document
+
+        # Construct the LLM prompt
+        llm_prompt = f"""
+        Below is a flowchart extracted from a document along with its corresponding code.
+
+        **Flowchart Description:**
+        {document_text}
+
+        **Corresponding Code:**
+        {document_text.split("CODE:")[1] if "CODE:" in document_text else "No code found"}
+
+        
+        Generate a new flowchart that represents the above logic using MermaidJS syntax. Output MermaidJS syntax only.
+        """
+        return llm_prompt
+
+
+def generate_flowchart(llm_prompt):
+    OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+    api_key = OPENAI_API_KEY
+    client = OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": llm_prompt}],
+        max_tokens=500
+    )
+    flowchart_code = response.choices[0].message.content.strip()
+
+    # Remove possible backticks and language tags (e.g., ```mermaid ... ```)
+    flowchart_code = re.sub(r"^```(?:mermaid)?\n?|```$", "", flowchart_code, flags=re.MULTILINE).strip()
+
+    print()
+    print("----FLOWCHART-CODE----")
+
+    print(flowchart_code)
+    print("----------END-----------")
+
+    return flowchart_code
+
+
+
+
+def render_mermaid(flowchart_code):
+    mermaid_script = f"""
+    <html>
+    <head>
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+            mermaid.initialize({{ startOnLoad: true }});
+        </script>
+    </head>
+    <body>
+    <div class="mermaid">
+    {flowchart_code}
+        
+    </div>
+    </body>
+    </html>
+    """
+    with open("generated_flowchart.html", "w") as f:
+        f.write(mermaid_script)
+    print("Flowchart saved as 'generated_flowchart.html'. Open it in a browser to view.")
+
+
+
+
 def save_image(image_bytes, output_folder, filename):
     with open(os.path.join(output_folder, filename), "wb") as f:
         f.write(image_bytes)
+
+def open_pdf(pdf_path):
+    abs_path = os.path.abspath(pdf_path)  # Get absolute path
+    webbrowser.open(f'file://{abs_path}')  # Open in default browser
+
+
+
+
 
 
