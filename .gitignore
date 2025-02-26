@@ -1,1 +1,7 @@
 .env
+package-lock.json
+package.json
+testing.html
+node_modules
+__pycache__
+

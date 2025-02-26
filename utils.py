@@ -67,6 +67,7 @@ def extract_images_and_code(pdf_path, output_folder):
 
     print(f"Extraction complete! Files saved in: {output_folder}")
 
+
 def create_vectordb(output_folder):
     images_path = output_folder  # Since images and code are in the same folder
     code_path = output_folder
@@ -130,6 +131,7 @@ def query_flowchart(query, output_folder):
     else:
         print("No matching flowchart found.")
 
+
 def query_flowchart_for_prompt(query, output_folder):
     query_embedding = embeddings.embed_query(query)
 
@@ -158,9 +160,6 @@ def query_flowchart_for_prompt(query, output_folder):
         return llm_prompt
 
 
-
-
-
 def generate_flowchart(llm_prompt):
     OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
     api_key = OPENAI_API_KEY
@@ -186,8 +185,6 @@ def generate_flowchart(llm_prompt):
 
 
 
-
-
 def render_mermaid(flowchart_code):
     mermaid_script = f"""
     <html>
@@ -198,7 +195,10 @@ def render_mermaid(flowchart_code):
         </script>
     </head>
     <body>
-        <div class="mermaid">{flowchart_code}</div>
+    <div class="mermaid">
+    {flowchart_code}
+        
+    </div>
     </body>
     </html>
     """
@@ -215,10 +215,4 @@ def save_image(image_bytes, output_folder, filename):
 
 
 
-query = "flowchart for a login authentication system"
-output_folder = "extracted_flowcharts"
-print()
-llm_prompt = query_flowchart_for_prompt(query, output_folder)
-print()
-flowchart_code = generate_flowchart(llm_prompt)
-render_mermaid(flowchart_code)
+
